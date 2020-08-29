@@ -31,10 +31,21 @@ func _on_connected(protocol = ""):
 	print('Successfully connected with protocol: ' + protocol)
 
 func _on_data():
-	print('Received data.')
-	print(_client.get_peer(1).get_packet().get_string_from_utf8())
+	var packet_string = _client.get_peer(1).get_packet().get_string_from_utf8()
 	
-	#    print("Got data from server: ", _client.get_peer(1).get_packet().get_string_from_utf8())
-
+	if packet_string[0] != '[':
+		handle_packet(packet_string, true)
+	else:
+		var data = JSON.parse(packet_string).result
+		
+		if not data:
+			return
+			
+		for i in data:
+			handle_packet(i)
+		
+func handle_packet(data, utf8 = false):
+	print('Handling packet: ', data)
+	
 func _process(_delta):
 	_client.poll()
